@@ -1,8 +1,23 @@
 defmodule Cassandra do
   import Cassandra.Utils
+
+  def generate_data() do
+    sensor_ids = [
+      "c84e52dc-d268-4806-9e8f-1d78f6e89dbf",
+      "54502f78-9e8e-408a-9379-8ad797a21859",
+      "e9e6be35-9669-4c78-9021-605275f68926",
+    ]
+
+    sensor_ids
+    |> Enum.take(1)
+    |> Enum.each(fn(id) -> 
+         generate_data_seconds(id)
+         generate_data_minutes(id)
+         generate_data_hours(id)
+       end)
+  end
   
-  def generate_data_seconds() do
-    sensor_id = :uuid.string_to_uuid("e3e3b1b8-02de-4986-9900-5f8f21eff3e0")
+  def generate_data_seconds(sensor_id) do
     date = 1446336000000
     metadata = "AAAF"
 
@@ -12,20 +27,20 @@ defmodule Cassandra do
     Enum.each(0..30, fn(day) -> 
       today = date + (day * 86400000)
       queries = for x <- 0..86399 do
-        timestamp = today + x
-        cql_query(query, values: [sensor_id: sensor_id, date: today, timestamp: timestamp, metadata: metadata, value: x])  
+        timestamp = today + (x * 1000)
+        cql_query(query, values: [sensor_id: :uuid.string_to_uuid(sensor_id), date: today, timestamp: timestamp, metadata: metadata, value: x])  
       end
       batch_query_1 = cql_query_batch(mode: 1, consistency: 1, queries: Enum.take(queries, 40000))
       {:ok, result} = :cqerl.run_query(client, batch_query_1)
+      :timer.sleep(1000)
       batch_query_2 = cql_query_batch(mode: 1, consistency: 1, queries: Enum.slice(queries, 40000, 1000000))
-      IO.puts("Done seconds #{day}")
       {:ok, result} = :cqerl.run_query(client, batch_query_2)
       :timer.sleep(1000)
+      IO.puts("Done with seconds for day #{day} on sensor #{sensor_id}")
     end)
   end
 
-  def generate_data_minutes() do
-    sensor_id = :uuid.string_to_uuid("e3e3b1b8-02de-4986-9900-5f8f21eff3e0")
+  def generate_data_minutes(sensor_id) do
     month = 1446336000000
     metadata = "AAAF"
 
@@ -34,15 +49,14 @@ defmodule Cassandra do
    
     queries = for x <- (0..43199) do
       timestamp = month + (x * 60000)
-      cql_query(query, values: [sensor_id: sensor_id, month: month, timestamp: timestamp, avg: x, min: x, max: x, count: 60])  
+      cql_query(query, values: [sensor_id: :uuid.string_to_uuid(sensor_id), month: month, timestamp: timestamp, avg: x, min: x, max: x, count: 60])  
     end
     batch_query = cql_query_batch(mode: 1, consistency: 1, queries: queries)
     {:ok, result} = :cqerl.run_query(client, batch_query)
-    IO.puts("Done minutes")
+    IO.puts("Done with minutes on sensor #{sensor_id}")
   end
 
-  def generate_data_hours() do
-    sensor_id = :uuid.string_to_uuid("e3e3b1b8-02de-4986-9900-5f8f21eff3e0")
+  def generate_data_hours(sensor_id) do
     timestamp = 1446336000000
     metadata = "AAAF"
 
@@ -51,11 +65,11 @@ defmodule Cassandra do
 
     queries = for x <- (0..720) do
       timestamp = timestamp + (x * 3600000)
-      cql_query(query, values: [sensor_id: sensor_id, timestamp: timestamp, avg: x, min: x, max: x, count: 60])  
+      cql_query(query, values: [sensor_id: :uuid.string_to_uuid(sensor_id), timestamp: timestamp, avg: x, min: x, max: x, count: 60])  
     end
     batch_query = cql_query_batch(mode: 1, consistency: 1, queries: queries)
     {:ok, result} = :cqerl.run_query(client, batch_query)
-    IO.puts("Done hours")
+    IO.puts("Done with hours on sensor #{sensor_id}")
   end
 
   def erlcass_get_one() do
