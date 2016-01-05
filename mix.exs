@@ -32,7 +32,6 @@ defmodule Cassandra.Mixfile do
       {:cowboy, "~> 1.0.0"},
       {:plug, "~> 1.0"},
       {:timex, "~> 1.0.0-rc3"},
-      {:erlcass, github: "silviucpp/erlcass", tag: "v2.2"},
     ]
   end
 end

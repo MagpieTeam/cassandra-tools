@@ -72,30 +72,30 @@ defmodule Cassandra do
     IO.puts("Done with hours on sensor #{sensor_id}")
   end
 
-  def erlcass_get_one() do
-    sensor_id = "e3e3b1b8-02de-4986-9900-5f8f21eff3e0"
-    date = 1448496000000
+  # def erlcass_get_one() do
+  #   sensor_id = "e3e3b1b8-02de-4986-9900-5f8f21eff3e0"
+  #   date = 1448496000000
 
-    :erlcass.execute(:get_measurements, [sensor_id, date])
+  #   :erlcass.execute(:get_measurements, [sensor_id, date])
 
-    # time = Time.measure(fn -> Cassandra.erlcass_get_one() end)
-    # IO.inspect(time)
-  end
+  #   # time = Time.measure(fn -> Cassandra.erlcass_get_one() end)
+  #   # IO.inspect(time)
+  # end
 
 
-  def erlcass_start() do
-    :ok = Application.start(:erlcass)
-    :ok = :erlcass.set_cluster_options(contact_points: <<"192.168.1.104">>)
-    :ok = :erlcass.create_session([])
-    :ok = :erlcass.add_prepare_statement(:get_measurements, <<"SELECT sensor_id, timestamp, value, metadata FROM magpie.measurements WHERE sensor_id = ? AND date = ?">>)
-    :ok = :erlcass.add_prepare_statement(:get_measurement, <<"SELECT * FROM magpie.measurements WHERE sensor_id = ? AND date = ? LIMIT 1;">>)
-  end
+  # def erlcass_start() do
+  #   :ok = Application.start(:erlcass)
+  #   :ok = :erlcass.set_cluster_options(contact_points: <<"192.168.1.104">>)
+  #   :ok = :erlcass.create_session([])
+  #   :ok = :erlcass.add_prepare_statement(:get_measurements, <<"SELECT sensor_id, timestamp, value, metadata FROM magpie.measurements WHERE sensor_id = ? AND date = ?">>)
+  #   :ok = :erlcass.add_prepare_statement(:get_measurement, <<"SELECT * FROM magpie.measurements WHERE sensor_id = ? AND date = ? LIMIT 1;">>)
+  # end
 
-  def erlcass_get(sensor_id, date) do
-    # sensor_id must be string, date must be timestamp (int, milliseconds since epoch)
+  # def erlcass_get(sensor_id, date) do
+  #   # sensor_id must be string, date must be timestamp (int, milliseconds since epoch)
     
-    :erlcass.execute(:get_measurements, [sensor_id, date])
-  end
+  #   :erlcass.execute(:get_measurements, [sensor_id, date])
+  # end
 
   def get(sensor_id, date) do
     Stream.resource(
